@@ -66,9 +66,9 @@ const getAddressesToSendFundsTo = (allAddresses, alreadyReceived) => {
 
 const sendFundsTo = async (addresses) => {
   // airdrop -- send these mfs money
-  const sendAmount = ethers.utils.parseEther("0.001") // "0.001" == 0.001 xDAI
+  const sendAmount = ethers.utils.parseEther("0.02") // "0.02" == 0.02 xDAI
   for (const addr of addresses) {
-  
+
     const tx = {
       from: wallet.address,
       to: addr,
