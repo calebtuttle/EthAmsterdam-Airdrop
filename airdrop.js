@@ -13,12 +13,16 @@ const gnosisChainRpc = 'https://rpc.gnosischain.com/';
 const provider = new ethers.providers.JsonRpcProvider(gnosisChainRpc, 100);
 const wallet = new ethers.Wallet(privateKey, provider);
 
-const mnemonic = process.env.MNEMONIC;
-const tempWallet = new ethers.Wallet.fromMnemonic(mnemonic);
-const wallet2 = new ethers.Wallet(tempWallet.privateKey, provider)
-
+// Log balance at time now
 let balance = await wallet.getBalance();
-console.log('Wallet balance: ', balance)
+balance = ethers.utils.formatEther(balance);
+var date = new Date;
+date.setTime(date.getTime());
+let [year, month, day] = [date.getFullYear(), date.getMonth(), date.getDate()];
+let [seconds, minutes, hour] =[date.getSeconds(), date.getMinutes(), date.getHours()];
+var milliSeconds = date.getMilliseconds();
+const timeVerbose = month + '-' + day + '-' + year + ' ' + hour + ':' + minutes + ':' + seconds + ':' + milliSeconds;
+console.log('Wallet balance at time', timeVerbose, '\n', balance, 'xDAI')
 
 
 // ------------------------------------------------------------------------------------
@@ -47,7 +51,7 @@ const getAddressesThatHaveReceivedFunds = () => {
   catch (err) {
     console.log(err)
   }
-  const alreadyReceivedArray = alreadyReceivedStr.split(/\r?\n/); 
+  const alreadyReceivedArray = alreadyReceivedAsStr.split(/\r?\n/); 
   const alreadyReceived = alreadyReceivedArray.map(addr => addr.trim())
   return alreadyReceived;
 }
@@ -83,62 +87,12 @@ const sendFundsTo = async (addresses) => {
   }
 }
 
-function fileTests() {
-  let alreadyReceivedAsStr = '';
-  try {
-    alreadyReceivedAsStr = fs.readFileSync('./alreadyReceived.txt', 'utf8');
-  }
-  catch (err) {
-    console.log(err)
-  }
-  const alreadyReceivedArray = alreadyReceivedAsStr.split(/\r?\n/); 
-  const alreadyReceived = alreadyReceivedArray.map(addr => addr.trim())
-
-  for (let i = 0; i < 5; i++) {
-    if (alreadyReceived.indexOf(i.toString()) != -1) {
-      continue;
-    }
-    const content = `${i}\n`
-    try {
-      fs.appendFileSync('./alreadyReceived.txt', content);
-    }
-    catch (err) {
-      console.log(err)
-    }
-  }
-  console.log(alreadyReceived + '\n')
-  console.log(alreadyReceived[0])
-}
-
 // ------------------------------------------------------------------------------------
 // End functions
 // ------------------------------------------------------------------------------------
 
-// await wallet.sendTransaction(tx);
-
-
+// Execute
 // const addrsWithPOAP = await getAddressesThatHaveThePOAP();
 // const addrsAlreadyFunded = getAddressesThatHaveReceivedFunds();
 // const addrsToFund = await getAddressesToSendFundsTo(addrsWithPOAP, addrsAlreadyFunded);
 // await sendFundsTo(addrsToFund);
-
-
-balance = await wallet.getBalance();
-console.log('Wallet balance before (shared): ', balance)
-balance = await wallet2.getBalance();
-console.log('Wallet balance before (mine)  : ', balance)
-
-const tx = {
-  from: wallet2.address,
-  to: wallet.address,
-  value: ethers.utils.parseEther("0.001"),
-  nonce: await wallet.getTransactionCount(),
-  gasLimit: ethers.utils.hexlify(100000),
-}
-// await wallet2.sendTransaction(tx);
-
-
-balance = await wallet.getBalance();
-console.log('Wallet balance after (shared): ', balance)
-balance = await wallet2.getBalance();
-console.log('Wallet balance after (mine)  : ', balance)
