@@ -22,7 +22,8 @@ let [year, month, day] = [date.getFullYear(), date.getMonth(), date.getDate()];
 let [seconds, minutes, hour] =[date.getSeconds(), date.getMinutes(), date.getHours()];
 var milliSeconds = date.getMilliseconds();
 const timeVerbose = month + '-' + day + '-' + year + ' ' + hour + ':' + minutes + ':' + seconds + ':' + milliSeconds;
-console.log('Wallet balance at time', timeVerbose, '\n', balance, 'xDAI')
+console.log('Time:', timeVerbose)
+console.log('Balance of', wallet.address, ':', balance, 'xDAI\n')
 
 
 // ------------------------------------------------------------------------------------
@@ -32,7 +33,7 @@ console.log('Wallet balance at time', timeVerbose, '\n', balance, 'xDAI')
 const getAddressesThatHaveThePOAP = async () => {
   const responseLimit = 0; // 0 is no limit
   // const url = `https://api.poap.xyz/event/27975/poaps?limit=${responseLimit}`; // EthDenver
-  const url = `https://api.poap.xyz/event/38934/poaps?limit=${responseLimit}`; // EthAmsterdam
+  const url = `https://api.poap.xyz/event/39172/poaps?limit=${responseLimit}`; // EthAmsterdam
   
   const resp = await fetch(url);
   const poaps = await resp.json();
@@ -65,18 +66,28 @@ const getAddressesToSendFundsTo = (allAddresses, alreadyReceived) => {
 
 const sendFundsTo = async (addresses) => {
   // airdrop -- send these mfs money
-  // const sendAmount = 20000000000000000; // == 2 * (10 ** 16) == 0.02 xDAI
+  const sendAmount = ethers.utils.parseEther("0.001") // "0.001" == 0.001 xDAI
   for (const addr of addresses) {
   
     const tx = {
       from: wallet.address,
       to: addr,
-      value: ethers.utils.parseEther("0.001"), // "0.001" == 0.001 xDAI
+      value: sendAmount, 
       nonce: await wallet.getTransactionCount(),
       gasLimit: ethers.utils.hexlify(100000),
     }
-    await wallet.sendTransaction(tx);
-  
+    try {
+      let txResp = await wallet.sendTransaction(tx);
+      await txResp.wait()
+      console.log('Sent', sendAmount, 'xDAI to:', addr)
+      console.log('tx hash: ', txResp.hash)
+    }
+    catch (err) {
+      console.log(err)
+      console.log('Received an error after attempt to send xDAI to:', addr)
+      continue;
+    }
+
     const content = `${addr}\n`
     try {
       fs.appendFileSync('./alreadyReceived.txt', content);
