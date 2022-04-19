@@ -103,7 +103,7 @@ const sendFundsTo = async (addresses) => {
 // ------------------------------------------------------------------------------------
 
 // Execute
-// const addrsWithPOAP = await getAddressesThatHaveThePOAP();
-// const addrsAlreadyFunded = getAddressesThatHaveReceivedFunds();
-// const addrsToFund = await getAddressesToSendFundsTo(addrsWithPOAP, addrsAlreadyFunded);
-// await sendFundsTo(addrsToFund);
+const addrsWithPOAP = await getAddressesThatHaveThePOAP();
+const addrsAlreadyFunded = getAddressesThatHaveReceivedFunds();
+const addrsToFund = await getAddressesToSendFundsTo(addrsWithPOAP, addrsAlreadyFunded);
+await sendFundsTo(addrsToFund);
