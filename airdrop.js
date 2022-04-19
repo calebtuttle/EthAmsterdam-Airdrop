@@ -13,18 +13,19 @@ const gnosisChainRpc = 'https://rpc.gnosischain.com/';
 const provider = new ethers.providers.JsonRpcProvider(gnosisChainRpc, 100);
 const wallet = new ethers.Wallet(privateKey, provider);
 
-// Log balance at time now
-let balance = await wallet.getBalance();
-balance = ethers.utils.formatEther(balance);
-var date = new Date;
-date.setTime(date.getTime());
-let [year, month, day] = [date.getFullYear(), date.getMonth(), date.getDate()];
-let [seconds, minutes, hour] =[date.getSeconds(), date.getMinutes(), date.getHours()];
-var milliSeconds = date.getMilliseconds();
-const timeVerbose = month + '-' + day + '-' + year + ' ' + hour + ':' + minutes + ':' + seconds + ':' + milliSeconds;
-console.log('Time:', timeVerbose)
-console.log('Balance of', wallet.address, ':', balance, 'xDAI\n')
-
+const showBalance = async () => {
+  // Log balance at time now
+  let balance = await wallet.getBalance();
+  balance = ethers.utils.formatEther(balance);
+  var date = new Date;
+  date.setTime(date.getTime());
+  let [year, month, day] = [date.getFullYear(), date.getMonth(), date.getDate()];
+  let [seconds, minutes, hour] =[date.getSeconds(), date.getMinutes(), date.getHours()];
+  var milliSeconds = date.getMilliseconds();
+  const timeVerbose = month + '-' + day + '-' + year + ' ' + hour + ':' + minutes + ':' + seconds + ':' + milliSeconds;
+  console.log('Time:', timeVerbose)
+  console.log('Balance of', wallet.address, ':', balance, 'xDAI\n')
+}
 
 // ------------------------------------------------------------------------------------
 // Functions
@@ -102,8 +103,20 @@ const sendFundsTo = async (addresses) => {
 // End functions
 // ------------------------------------------------------------------------------------
 
+
 // Execute
-const addrsWithPOAP = await getAddressesThatHaveThePOAP();
-const addrsAlreadyFunded = getAddressesThatHaveReceivedFunds();
-const addrsToFund = await getAddressesToSendFundsTo(addrsWithPOAP, addrsAlreadyFunded);
-await sendFundsTo(addrsToFund);
+const main = async () => {
+  while (true) {
+    await showBalance()
+    const addrsWithPOAP = await getAddressesThatHaveThePOAP();
+    const addrsAlreadyFunded = getAddressesThatHaveReceivedFunds();
+    const addrsToFund = await getAddressesToSendFundsTo(addrsWithPOAP, addrsAlreadyFunded);
+    await sendFundsTo(addrsToFund);
+  }
+}
+  
+main().then(() => process.exit(0)).catch((error) => {
+  console.log(error);
+  process.exit(1);
+})
+  
